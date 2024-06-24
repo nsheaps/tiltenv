@@ -1,0 +1,3 @@
+# Tiltfile and *.tilt files should be treated as python code
+Tiltfile linguist-language=Python
+*.tilt linguist-language=Python

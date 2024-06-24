@@ -1,0 +1,66 @@
+# NOTES:
+# - All paths are relative to the location of the tiltenv.tiltenvRoot folder
+# - if tiltenv is run from the system binary, the tiltenvRoot is the tiltenvs install directory
+#  -
+workspace:
+  workspaceNameTemplate: "{{WHOAMI}}"
+
+  provider:
+    # only one can be used at a time
+    KindClusterWorkspaceProvider:
+      kindClusterName: my-kind-cluster
+    CurrentK8sContextProvider:
+      namespaceNameTemplate: "ws-{{.workspaceName}}"
+    K8sContextWorkspaceProvider:
+      k8sContext: k8s-dev # or docker-desktop if you're using the cluster built into docker desktop
+      namespaceNameTemplate: "ws-{{.workspaceName}}"
+
+  stateProvider:
+    # only one can be used at a time
+    LocalWorkspaceStateProvider:
+      workspaceStatePath: "./workspace/{{workspace}}/state.yaml"
+    K8sConfigMapWorkspaceStateProvider:
+      # same as local workspace state provider but stores state in a k8s config map
+      configMapName: "ws-{{workspace.workspaceName}}-state"
+      configMapNamespace: "{{workspace.workspaceNamespace}}"
+    K8sCrdWorkspaceStateProvider:
+      # this provider requires the deployment of a controller into the cluster to manage
+      # resources associated with the CRD. It can be combined with any k8s workspace provider
+      crdName: "{{workspace.workspaceName}}"
+      namespace: "{{workspace.workspaceNamespace}}"
+      controller:
+        # if true, controller will be deployed when workspace is created
+        deploy: false
+        # if true, controller will be deleted when workspace is destroyed
+        destroyOnWorkspaceDestroy: false
+        controllerNamespace: tiltenv
+
+serviceProvider:
+  # 1 or more, honored in order they're defined if they'res conflicts between the providers
+  StaticServiceProvider:
+    services:
+      pause:
+        # skips checking out code if falsy, otherwise checks out code to {{tiltenv.checkoutRoot}}/{{service}}
+        gitOrigin: null
+        # when using tilt env to interact with services, these names can also be used
+        aliases:
+          - tiltenv-test
+          - noop
+        entrypoint: "./services/pause/service.tilt"
+        dependsOn: []
+  LocalServiceProvider:
+    servicePath: "./service.yaml"
+  GitServiceProvider:
+    gitOrigin: "https://github.com/nsheaps/tiltenv-services.git"
+    servicePath: "./service.yaml"
+  RemoteServiceProvider:
+    serviceUrl: https://services.k8s-dev.my.cloud/search
+  BackstageServiceProvider:
+    serviceUrl: https://backstage.my.cloud/search
+
+tiltenv:
+  checkoutRoot: ~/src/
+  # TODO: should services root be separate from tiltenv itself? When it's installed and you run tiltenv from the checkout dir
+  # direnv will use the tiltenv from the checkout dir, do we want to use that as the services root?
+  installRoot: ~/.local/tiltenv/
+  servicesRoot: ~/src/tiltenv-services/
