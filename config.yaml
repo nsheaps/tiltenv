@@ -1,7 +1,6 @@
 # NOTES:
-# - All paths are relative to the location of the tiltenv.tiltenvRoot folder
+# - All paths are relative to the location of the tiltenv.configRoot folder
 # - if tiltenv is run from the system binary, the tiltenvRoot is the tiltenvs install directory
-#  -
 workspace:
   workspaceNameTemplate: "{{WHOAMI}}"
 
@@ -10,15 +9,23 @@ workspace:
     KindClusterWorkspaceProvider:
       kindClusterName: my-kind-cluster
     CurrentK8sContextProvider:
+      # Doesn't touch the k8s context
       namespaceNameTemplate: "ws-{{.workspaceName}}"
     K8sContextWorkspaceProvider:
+      # Tilt will hold onto the context when it starts, but subsequent kubectl commands will not.
+      # This will swap to that context, start tilt, then swap back to whatever context you had before, but will not
+      # change paths to account for the system change of context. You can access this string via `local("tiltenv workspace get-context")`
       k8sContext: k8s-dev # or docker-desktop if you're using the cluster built into docker desktop
       namespaceNameTemplate: "ws-{{.workspaceName}}"
+    LocalWorkspaceProvider:
+      # no interaction with kubernetes if this is the only provider
+      workspacePath: "$HOME/.tiltenv/workspace/{{workspace}}/"
 
   stateProvider:
     # only one can be used at a time
     LocalWorkspaceStateProvider:
-      workspaceStatePath: "./workspace/{{workspace}}/state.yaml"
+      # workspaceStatePath: "./workspace/{{workspace}}/state.yaml"
+      workspaceStatePath: "$HOME/.tiltenv/workspace/{{workspace}}/state.yaml"
     K8sConfigMapWorkspaceStateProvider:
       # same as local workspace state provider but stores state in a k8s config map
       configMapName: "ws-{{workspace.workspaceName}}-state"
@@ -31,7 +38,7 @@ workspace:
       controller:
         # if true, controller will be deployed when workspace is created
         deploy: false
-        # if true, controller will be deleted when workspace is destroyed
+        # if true, controller will be deleted when workspace is destroyed. Cannot be true if deploy is false
         destroyOnWorkspaceDestroy: false
         controllerNamespace: tiltenv
 
@@ -89,6 +96,8 @@ tiltenv:
   # # direnv will use the tiltenv from the checkout dir, do we want to use that as the services root?
   # installRoot: ~/.local/tiltenv/
   # where do you pull this config.yaml from
+  # if not set, this is what is passed in to the set-config command. If the command is called with a local dir and it's not set, then
+  # it will not update when `tiltenv update-config` is called
   configOrigin: https://github.com/nsheaps/tiltenv.git
   # if not defined it will default to the repo name in the checkoutRoot
   configRoot: ~/src/tiltenv/
