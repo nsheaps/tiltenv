@@ -40,27 +40,55 @@ serviceProvider:
   StaticServiceProvider:
     services:
       pause:
-        # skips checking out code if falsy, otherwise checks out code to {{tiltenv.checkoutRoot}}/{{service}}
+        # skips checking out code if falsy, otherwise checks out code to {{tiltenv.checkoutRoot}}/{{ repoName }}
+        # multiple services can have the same gitOrigin and get updated when running tiltenv update-services
         gitOrigin: null
-        # when using tilt env to interact with services, these names can also be used
+        # when using tilt env to interact with services, these names can also be used. If there's overlap in aliases between
+        # services, the first definition wins, so use sparingly or specifically.
         aliases:
           - tiltenv-test
           - noop
+        # if gitOrigin is null, relative to the checkout location of tiltenv.configRoot
         entrypoint: "./services/pause/service.tilt"
+        # when tilt configs are built, any resources detected in this service will wait for the
+        # resources in these other services to become ready before this one starts. In order for dependsOn to work
+        # properly, the service's tilt file must either pass k8s yaml or the names of the service's deployables in order
+        # to set up the dependencies. If yaml is passed it is also ran through tilt's k8s_yaml to launch the services after
+        # any tiltenv related modifications have been made to the manifests.
         dependsOn: []
+        # unlike dependsOn, runtimeDependsOn only requires these other services to be enabled, not
+        # ready before this one starts. Use this if you want to parallelize services like a compile service
+        # and typechecking service
+        runtimeDependsOn: []
+  # all of these providers produce data in a shape similar to the above, and can be listed any number of times
   LocalServiceProvider:
-    servicePath: "./service.yaml"
+    # relative to tiltenv.configRoot
+    servicePath: "./services.yaml"
   GitServiceProvider:
+    # this config is only useful if you want to include other repo's services in your own tiltenv.
+    # if gitOrigin is falsey, default to tiltenv.configRoot. If it's the same, the checkout location will be the same as
+    # tiltenv.configRoot and is effectively the same as a LocalServiceProvider (though will still get parsed and loaded again)
     gitOrigin: "https://github.com/nsheaps/tiltenv-services.git"
-    servicePath: "./service.yaml"
+    # default path if not defined is services.yaml
+    servicePath: "./services.yaml"
+    # every time a service-refresh happens, it will pull the repo to ensure it's up to date. Does not change branches
+    alwaysFresh: false
   RemoteServiceProvider:
     serviceUrl: https://services.k8s-dev.my.cloud/search
   BackstageServiceProvider:
     serviceUrl: https://backstage.my.cloud/search
 
 tiltenv:
+  # when you enable a service, where does it get clone it's repo (repo name added)
   checkoutRoot: ~/src/
-  # TODO: should services root be separate from tiltenv itself? When it's installed and you run tiltenv from the checkout dir
-  # direnv will use the tiltenv from the checkout dir, do we want to use that as the services root?
-  installRoot: ~/.local/tiltenv/
-  servicesRoot: ~/src/tiltenv-services/
+  # Tiltenv the app should be installed separately from the services repo so this doesn't matter. That said, the tiltenv app
+  # and an example, working git services provider can exist in the same repo. In the case that tiltenv is run from within the
+  # repo that also contains the app and a config, that local config will be used. Direnv must be set up and working to replace
+  # the installed tiltenv with that one.
+  # # TODO: should services root be separate from tiltenv itself? When it's installed and you run tiltenv from the checkout dir
+  # # direnv will use the tiltenv from the checkout dir, do we want to use that as the services root?
+  # installRoot: ~/.local/tiltenv/
+  # where do you pull this config.yaml from
+  configOrigin: https://github.com/nsheaps/tiltenv.git
+  # if not defined it will default to the repo name in the checkoutRoot
+  configRoot: ~/src/tiltenv/
