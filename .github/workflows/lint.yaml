@@ -49,4 +49,11 @@ jobs:
             || steps.pylint.outcome == 'failure'
             || steps.isort.outcome == 'failure'
           }}
-        run: exit 1
+        run: |
+          echo "Lint errors found"
+          echo "  flake8: ${{ steps.flake8.outcome }}"
+          echo "  black: ${{ steps.black.outcome }}"
+          echo "  mypy: ${{ steps.mypy.outcome }}"
+          echo "  pylint: ${{ steps.pylint.outcome }}"
+          echo "  isort: ${{ steps.isort.outcome }}""
+          exit 1
