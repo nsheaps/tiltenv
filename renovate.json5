@@ -5,11 +5,14 @@
   ],
   "dependencyDashboardHeader": "This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://developer.mend.io/github/nsheaps/tiltenv) docs to learn more.",
   "packageRules": [
+    // only update the patch version of python if the source file is .python-version
+    // major/minor versions should be updated manually for compatibility. Make sure to update pyproject.toml as well
     {
       "packagePatterns": ["python"],
       "matchFileNames": [".python-version"],
       "updateTypes": ["patch"]
     },
+    // Combine all github actions into one group
     {
       "packagePatterns": ["actions/*"],
       "groupName": "GitHub Actions"
