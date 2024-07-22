@@ -41,8 +41,7 @@ jobs:
         continue-on-error: true
 
       - name: Fail on lint errors
-        if: |
-          ${{
+        if: ${{
             steps.flake8.outcome == 'failure'
             || steps.black.outcome == 'failure'
             || steps.mypy.outcome == 'failure'
@@ -55,5 +54,5 @@ jobs:
           echo "  black: ${{ steps.black.outcome }}"
           echo "  mypy: ${{ steps.mypy.outcome }}"
           echo "  pylint: ${{ steps.pylint.outcome }}"
-          echo "  isort: ${{ steps.isort.outcome }}""
+          echo "  isort: ${{ steps.isort.outcome }}"
           exit 1
