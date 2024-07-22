@@ -8,13 +8,12 @@
     // only update the patch version of python if the source file is .python-version
     // major/minor versions should be updated manually for compatibility. Make sure to update pyproject.toml as well
     {
-      "packagePatterns": ["python"],
       "matchFileNames": [".python-version"],
-      "updateTypes": ["patch"]
+      "matchUpdateTypes": ["patch"]
     },
     // Combine all github actions into one group
     {
-      "packagePatterns": ["actions/*"],
+      "matchPackagePatterns": ["actions/*"],
       "groupName": "GitHub Actions"
     }
   ]
