@@ -5,7 +5,8 @@
   ],
   "packageRules": [
     {
-      "packagePatterns": ["pyenv"],
+      "packagePatterns": ["python"],
+      "matchFileNames": [".python-version"],
       "updateTypes": ["patch"]
     },
     {
