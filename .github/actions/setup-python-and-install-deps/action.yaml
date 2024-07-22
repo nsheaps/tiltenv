@@ -1,28 +1,29 @@
-name: 'Setup Python'
+name: Setup Python
 
-description: 'Set up Python and Poetry using .python-version (caches dependencies too)'
+description: |
+  Set up Python and Poetry using .python-version (caches dependencies too)
 
 runs:
-  using: 'composite'
+  using: composite
   steps:
-    - name: 'Get python version'
-      id: 'python-version'
+    - name: Get python version
+      id: python-version
       shell: bash
       run: |
         echo "version=$(cat .python-version)" >> $GITHUB_OUTPUT
         echo "poetry-version=$(cat .poetry-version)" >> $GITHUB_OUTPUT
 
-    - name: 'Set up python'
-      uses: 'actions/setup-python@v2'
+    - name: Set up python
+      uses: actions/setup-python@v2
       with:
         python-version: '${{ steps.python-version.outputs.version }}'
 
-    - name: 'Install and configure Poetry'
-      uses: 'snok/install-poetry@v1'
+    - name: Install and configure Poetry
+      uses: snok/install-poetry@v1
       with:
-        version: '${{ steps.python-version.outputs.poetry-version }}'
-        virtualenvs-create: true
-        virtualenvs-in-project: true
+        version: ${{ steps.python-version.outputs.poetry-version }}
+        virtualenvs-create: false
+        virtualenvs-in-project: false
 
     - name: Set up cache
       uses: actions/cache@v2
