@@ -155,3 +155,4 @@ cython_debug/
 # tiltenv
 workspace/**
 !workspace/.gitkeep
+.installed

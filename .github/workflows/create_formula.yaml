@@ -1,0 +1,85 @@
+name: Create Homebrew Formula
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  create-formula:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        pip install poetry
+        poetry install
+
+    - name: Build package
+      run: poetry build
+
+    - name: Generate requirements
+      run: poetry export -f requirements.txt --without-hashes > requirements.txt
+
+    - name: Create formula
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/v}
+        TARBALL_URL="https://github.com/${{ github.repository }}/archive/v${VERSION}.tar.gz"
+        TARBALL_SHA=$(curl -sL $TARBALL_URL | sha256sum | cut -d ' ' -f 1)
+
+        cat << EOF > formula.rb
+        class Tiltenv < Formula
+          include Language::Python::Virtualenv
+
+          desc "A CLI tool for managing Tilt environments"
+          homepage "https://github.com/${{ github.repository }}"
+          url "$TARBALL_URL"
+          sha256 "$TARBALL_SHA"
+          version "$VERSION"
+
+          depends_on "python@3.11"
+
+          $(python3 - << END
+        import re
+
+        def parse_requirements(filename):
+            with open(filename, 'r') as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith('#'):
+                        match = re.match(r'^([a-zA-Z0-9-_]+)==(.+)$', line)
+                        if match:
+                            yield match.groups()
+
+        for package, version in parse_requirements('requirements.txt'):
+            print(f'  resource "{package}" do')
+            print(f'    url "https://files.pythonhosted.org/packages/source/{package[0]}/{package}/{package}-{version}.tar.gz"')
+            print('    sha256 "REPLACE_WITH_ACTUAL_SHA256"')
+            print('  end')
+        END
+        )
+
+          def install
+            virtualenv_install_with_resources
+          end
+
+          test do
+            system bin/"tiltenv", "--help"
+          end
+        end
+        EOF
+
+        echo "Generated Homebrew formula:"
+        cat formula.rb
+
+    - name: Upload formula artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: homebrew-formula
+        path: formula.rb

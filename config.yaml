@@ -50,6 +50,11 @@ serviceProvider:
         # skips checking out code if falsy, otherwise checks out code to {{tiltenv.checkoutRoot}}/{{ repoName }}
         # multiple services can have the same gitOrigin and get updated when running tiltenv update-services
         gitOrigin: null
+        # relative to tiltenv.checkoutRoot
+        # services that share a git origin and checkout path will get updated together
+        # if the checkout path already exists but is not the same git origin, tiltenv will error instead of enabling
+        # try to prefer the repo name
+        checkoutPath: "$REPO_NAME" # or "$SERVICE_NAME", also available: $REPO_OWNER
         # when using tilt env to interact with services, these names can also be used. If there's overlap in aliases between
         # services, the first definition wins, so use sparingly or specifically.
         aliases:
@@ -100,4 +105,6 @@ tiltenv:
   # it will not update when `tiltenv update-config` is called
   configOrigin: https://github.com/nsheaps/tiltenv.git
   # if not defined it will default to the repo name in the checkoutRoot
-  configRoot: ~/src/tiltenv/
+  # if a file is not provided in config root, it will default to config.yaml
+  # the double slash is the start of the path relative to the repo root
+  configRoot: ~/src/tiltenv//config.yaml

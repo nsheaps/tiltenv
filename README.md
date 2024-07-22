@@ -27,7 +27,15 @@ Note, if `tiltenv` is run from this folder, it defaults to using the `config.yam
 | tiltenv update-services |                   iterate through every enabled service's directory and git pull. tiltenv sets tilt to watch the git files, so this will trigger a reload |
 
 ## First time setup
+
+> [!TIP] Just looking to install tiltenv?
+> Install with `brew install nsheaps/devsetup/tiltenv`
+
 1. Set up `direnv`, make sure to set up the shell hooks in your rc file
 2. Clone this repository and `cd` into it
-3. Run `brew bundle` to install dependencies
-4. Run `tiltenv install` to install the tiltenv binary
+3. `direnv allow .` which will make sure all dependencies are installed
+   - Python 3.11 or higher
+   - [Poetry](https://python-poetry.org/)
+4. Run `brew bundle` to install dependencies
+5. [Optional] Run `tiltenv develop` to install the tiltenv binary from this repo into a system path.
+   If you do, `tiltenv` will always run from the git repo instead of the one installed by brew.
