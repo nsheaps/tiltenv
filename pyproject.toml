@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "A CLI tool for managing Tilt environments"
 authors = ["Nathan Heaps <nsheaps@gmail.com>"]
 readme = "README.md"
-packages = [{include = "tiltenv"}]
+packages = [{include = "src/tiltenv"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"

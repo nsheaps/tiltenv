@@ -22,22 +22,22 @@ jobs:
 
       - name: Black
         id: black
-        run: poetry run black --check .
+        run: poetry run black --check ./src
         continue-on-error: true
 
       - name: MyPy
         id: mypy
-        run: poetry run mypy .
+        run: poetry run mypy ./src
         continue-on-error: true
 
       - name: Pylint
         id: pylint
-        run: poetry run pylint ./tiltenv
+        run: poetry run pylint ./src
         continue-on-error: true
 
       - name: isort
         id: isort
-        run: poetry run isort --check .
+        run: poetry run isort --check ./src
         continue-on-error: true
 
       - name: Fail on lint errors

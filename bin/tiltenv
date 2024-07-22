@@ -2,6 +2,6 @@
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 
-cd "$REPO_ROOT"
+cd "$REPO_ROOT/src"
 
 poetry run python -m tiltenv.main "$@"
