@@ -1,0 +1,8 @@
+[flake8]
+extend-ignore =
+exclude =
+  .git
+  __pycache__
+  docs/
+  .venv/
+max-complexity = 10
