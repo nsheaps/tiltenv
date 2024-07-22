@@ -3,6 +3,7 @@
   "extends": [
     "config:recommended"
   ],
+  "dependencyDashboardHeader": "This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://developer.mend.io/github/nsheaps/tiltenv) docs to learn more.",
   "packageRules": [
     {
       "packagePatterns": ["python"],
