@@ -15,7 +15,7 @@ runs:
     - name: 'Set up python'
       uses: 'actions/setup-python@v2'
       with:
-        python-version: '${{ inputs.python-version }}'
+        python-version: '${{ steps.python-version.outputs.version }}'
 
     - name: 'Install and configure Poetry'
       uses: 'snok/install-poetry@v1'
@@ -30,6 +30,7 @@ runs:
       with:
         path: .venv
         key: venv-${{ runner.os }}-${{ steps.python-version.outputs.version }}-${{ hashFiles('**/poetry.lock') }}
+
     - name: Install dependencies
       shell: bash
       run: poetry install --no-interaction
